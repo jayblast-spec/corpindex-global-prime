@@ -38,7 +38,6 @@ export interface IntelligencePayload {
   refreshedAt: string;
   freshness: {
     label: string;
-    cacheSeconds: number;
     nextRefreshHint: string;
   };
   coverage: {

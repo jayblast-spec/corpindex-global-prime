@@ -40,7 +40,7 @@ type FilingSignal = {
 
 const jsonHeaders = {
   "Content-Type": "application/json; charset=utf-8",
-  "Cache-Control": "s-maxage=900, stale-while-revalidate=3600",
+  "Cache-Control": "public, max-age=0, must-revalidate",
 };
 
 async function fetchJson(url: string, init?: RequestInit) {
@@ -290,8 +290,7 @@ export default async function handler(_req: any, res: any) {
     refreshedAt,
     freshness: {
       label: errors.length ? "Partial live refresh" : "Live refresh complete",
-      cacheSeconds: 900,
-      nextRefreshHint: "Every 15 minutes on Vercel edge cache, with stale-while-revalidate fallback.",
+      nextRefreshHint: "CorpIndex continuously refreshes public news, market, and filing signals throughout the day.",
     },
     coverage: {
       newsSignals: news.length,

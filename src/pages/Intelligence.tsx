@@ -30,7 +30,7 @@ const Intelligence = () => {
               </div>
             </div>
             <p className="font-mono text-2xl font-bold">{formatRefresh(data?.refreshedAt)}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{data?.freshness.nextRefreshHint || "Live source refresh configured through Vercel Functions."}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{data?.freshness.nextRefreshHint || "CorpIndex continuously refreshes public news, market, and filing signals throughout the day."}</p>
           </CardContent>
         </Card>
       </div>
