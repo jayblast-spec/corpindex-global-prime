@@ -53,27 +53,27 @@ function buildPageAnswer(path: string) {
 
   const pageGuides: Record<string, string> = {
     home:
-      "You are on the CorpIndex home page. Use it to understand the product promise: global corporate rankings, verification, and live intelligence. Best next steps: open Rankings to compare companies, Intelligence for live signals, or Methodology to inspect how trust is scored.",
+      "This is the CorpIndex command surface: rankings, verification, and live intelligence. Best next step: open Rankings, Intelligence, or Methodology.",
     rankings:
-      "You are on Global Rankings. This page is for comparing companies by CorpIndex score, sector, country, status, market cap, and movement. Use filters to narrow the list, then open a company profile when you need a deeper read.",
+      "This page compares companies by score, sector, country, status, market cap, and movement. Use filters, then open a company profile for deeper context.",
     intelligence:
-      "You are on the Intelligence page. This is the live signal layer: news, market movement, filings, and generated briefs. Use it when you want current context instead of a static ranking.",
+      "This is the live signal layer: news, market movement, filings, and generated briefs. Use it when you need current context.",
     methodology:
-      "You are on Methodology. This page explains the scoring model, evaluation process, and CorpIndex Verified Standard. It is the trust foundation for investors, partners, and companies that want to understand how credibility is assessed.",
+      "This page explains the scoring model, evaluation process, and CorpIndex Verified Standard. It is the trust foundation.",
     news:
-      "You are on News & Insights. This page should surface ranking updates, market analysis, methodology notes, and regional intelligence. Use it to turn CorpIndex signals into editorial authority.",
+      "This page turns CorpIndex signals into ranking updates, market analysis, methodology notes, and regional intelligence.",
     "company application":
-      "You are on Apply for Review. This is where a company begins the indexing and verification journey. The key value is credibility: ownership review, governance checks, disclosure discipline, and monitoring readiness.",
+      "This is where a company begins indexing and verification. The value is credibility through governance, ownership, disclosure, and monitoring review.",
     partner:
-      "You are on Partner. This page is for sponsors, advertisers, data partners, and institutional collaborators who want access to CorpIndex's executive and investor audience.",
+      "This page is for sponsors, data partners, and institutional collaborators who want access to CorpIndex's executive and investor audience.",
     "company profile":
-      "You are on a company profile. Use this view to inspect company score, verification status, sector context, market signals, and risk posture before comparing it with peers.",
+      "This company profile is for score context, verification status, market signals, and risk posture before peer comparison.",
   };
 
   return [
-    `Page guide: ${page}\n\n`,
+    `${page} guide: `,
     pageGuides[page] || "This page is part of the CorpIndex intelligence platform. I can help summarize it, explain the next action, or turn it into a brief.",
-    "\n\nAsk me: \"What should I inspect here?\", \"Create a brief from this page\", or \"What risk signals matter?\"",
+    " Ask me what to inspect next.",
   ].join("");
 }
 

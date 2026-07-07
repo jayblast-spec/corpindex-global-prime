@@ -88,7 +88,7 @@ function parseSseChunk(chunk: string) {
 const starterMessage: ChatMessage = {
   id: "assistant-starter",
   role: "assistant",
-  content: "I am Aether, CorpIndex's live intelligence co-pilot. I can explain this page, create a brief, scan risk, or help you decide what to inspect next.",
+  content: "I can explain this page, create a brief, or scan risk.",
 };
 
 const quickActions = ["Explain this page", "Create brief", "Risk scan"] as const;
@@ -98,10 +98,12 @@ export default function AetherChatWidget() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([starterMessage]);
   const [error, setError] = useState<string | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const successTimerRef = useRef<number | null>(null);
 
   const isBusy = aiState === "processing" || aiState === "typing";
+  const visibleMessages = isExpanded ? messages.slice(-4) : messages.slice(-1);
   const statusLabel = useMemo(() => {
     if (aiState === "processing") return "Computing";
     if (aiState === "typing") return "Streaming";
@@ -210,6 +212,7 @@ export default function AetherChatWidget() {
       }
 
       setError(null);
+      setIsExpanded(true);
       setAiState("processing");
       setInput("");
 
@@ -246,28 +249,33 @@ export default function AetherChatWidget() {
 
   return (
     <div className="pointer-events-none fixed bottom-3 right-3 z-50 h-[min(86vh,46rem)] w-[min(96vw,38rem)] sm:bottom-5 sm:right-5">
-      <div className="absolute bottom-24 right-0 h-[min(64vh,34rem)] w-[min(88vw,30rem)] drop-shadow-[0_32px_70px_rgba(15,23,42,0.42)] sm:bottom-28 sm:right-1">
+      <div className="absolute bottom-16 right-0 h-[min(72vh,38rem)] w-[min(92vw,32rem)] drop-shadow-[0_32px_70px_rgba(15,23,42,0.42)] sm:bottom-20 sm:right-1">
         <Suspense fallback={<div className="h-full w-full animate-pulse rounded-[2rem] bg-white/10 backdrop-blur-sm" />}>
           <Aether3D aiState={aiState} className="h-full w-full" />
         </Suspense>
       </div>
 
-      <section className="pointer-events-auto absolute bottom-0 right-0 w-[min(92vw,22rem)] overflow-hidden rounded-[1.35rem] border border-white/20 bg-slate-100/70 text-slate-950 shadow-2xl shadow-slate-900/25 backdrop-blur-2xl">
-        <div className="flex items-center justify-between border-b border-white/40 px-4 py-3">
+      <section className="pointer-events-auto absolute bottom-0 right-0 w-[min(90vw,19.5rem)] overflow-hidden rounded-[1.35rem] border border-white/20 bg-slate-100/65 text-slate-950 shadow-2xl shadow-slate-900/20 backdrop-blur-2xl">
+        <div className="flex items-center justify-between border-b border-white/40 px-3.5 py-2.5">
           <div>
             <p className="text-sm font-semibold tracking-tight">Aether</p>
             <p className="text-xs text-slate-600">CorpIndex intelligence co-pilot</p>
           </div>
-          <div className="rounded-full border border-slate-900/10 bg-white/60 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-600">
-            {statusLabel}
-          </div>
+          <button
+            aria-label={isExpanded ? "Minimize Aether chat" : "Expand Aether chat"}
+            className="rounded-full border border-slate-900/10 bg-white/65 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-600 transition hover:bg-white"
+            onClick={() => setIsExpanded((value) => !value)}
+            type="button"
+          >
+            {isExpanded ? "Minimize" : statusLabel}
+          </button>
         </div>
 
-        <div className="max-h-56 space-y-3 overflow-y-auto p-4">
-          {messages.map((message) => (
+        <div className={`${isExpanded ? "max-h-48" : "max-h-20"} space-y-2 overflow-y-auto p-3`}>
+          {visibleMessages.map((message) => (
             <article
               key={message.id}
-              className={`rounded-2xl px-4 py-3 text-sm leading-6 ${
+              className={`rounded-2xl px-3 py-2 text-xs leading-5 ${
                 message.role === "user"
                   ? "ml-8 bg-slate-950 text-white"
                   : "mr-8 border border-slate-900/10 bg-white/70 text-slate-700 shadow-sm"
@@ -279,10 +287,10 @@ export default function AetherChatWidget() {
           {error && <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-700">{error}</p>}
         </div>
 
-        <div className="flex flex-wrap gap-2 border-t border-white/40 bg-white/20 px-4 py-3">
+        <div className="flex gap-2 overflow-x-auto border-t border-white/40 bg-white/20 px-3 py-2.5">
           {quickActions.map((action) => (
             <button
-              className="rounded-full border border-slate-900/10 bg-white/65 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-white disabled:opacity-45"
+              className="shrink-0 rounded-full border border-slate-900/10 bg-white/65 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-white disabled:opacity-45"
               disabled={isBusy}
               key={action}
               onClick={() => void submit(undefined, action)}
@@ -297,7 +305,7 @@ export default function AetherChatWidget() {
           <div className="flex items-end gap-2 rounded-2xl border border-slate-900/10 bg-white/70 p-2 shadow-inner">
             <textarea
               aria-label="Message Aether"
-              className="max-h-28 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm text-slate-950 outline-none placeholder:text-slate-500"
+              className="max-h-20 min-h-9 flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-slate-950 outline-none placeholder:text-slate-500"
               disabled={isBusy}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={handleInputKeyDown}
