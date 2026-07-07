@@ -15,11 +15,15 @@ const metrics = [
   { label: "Avg Score", value: "$72.4" },
 ];
 
+const tablePageSize = 10;
+const mapPageSize = 12;
+
 const RankingTable = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [sector, setSector] = useState("all");
   const [country, setCountry] = useState("all");
   const [view, setView] = useState<"table" | "map">("table");
+  const [currentPage, setCurrentPage] = useState(1);
   const [sortConfig, setSortConfig] = useState<{ key: keyof Company; direction: "asc" | "desc" }>({
     key: "rank",
     direction: "asc",
@@ -41,8 +45,39 @@ const RankingTable = () => {
     });
   }, [country, searchQuery, sector, sortConfig]);
 
+  const pageSize = view === "table" ? tablePageSize : mapPageSize;
+  const totalPages = Math.max(1, Math.ceil(sortedCompanies.length / pageSize));
+  const boundedPage = Math.min(currentPage, totalPages);
+  const pageStart = (boundedPage - 1) * pageSize;
+  const pagedCompanies = sortedCompanies.slice(pageStart, pageStart + pageSize);
+  const visiblePages = Array.from({ length: totalPages }, (_, index) => index + 1).filter((page) => {
+    if (totalPages <= 5) return true;
+    return page === 1 || page === totalPages || Math.abs(page - boundedPage) <= 1;
+  });
+
   const handleSort = (key: keyof Company) => {
+    setCurrentPage(1);
     setSortConfig((prev) => ({ key, direction: prev.key === key && prev.direction === "asc" ? "desc" : "asc" }));
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setCurrentPage(1);
+  };
+
+  const handleSectorChange = (value: string) => {
+    setSector(value);
+    setCurrentPage(1);
+  };
+
+  const handleCountryChange = (value: string) => {
+    setCountry(value);
+    setCurrentPage(1);
+  };
+
+  const handleViewChange = (nextView: "table" | "map") => {
+    setView(nextView);
+    setCurrentPage(1);
   };
 
   const getRankBadge = (rank: number) => {
@@ -72,11 +107,11 @@ const RankingTable = () => {
 
         <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="inline-flex rounded-lg border border-border/50 bg-card p-1">
-            <Button variant={view === "table" ? "default" : "ghost"} size="sm" onClick={() => setView("table")}>
+            <Button variant={view === "table" ? "default" : "ghost"} size="sm" onClick={() => handleViewChange("table")}>
               <Table2 className="h-4 w-4" />
               Table View
             </Button>
-            <Button variant={view === "map" ? "default" : "ghost"} size="sm" onClick={() => setView("map")}>
+            <Button variant={view === "map" ? "default" : "ghost"} size="sm" onClick={() => handleViewChange("map")}>
               <Map className="h-4 w-4" />
               Map View
             </Button>
@@ -93,11 +128,11 @@ const RankingTable = () => {
             <Input
               placeholder="Search by company name or ticker..."
               value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
+              onChange={(event) => handleSearchChange(event.target.value)}
               className="border-border/50 bg-card pl-10"
             />
           </div>
-          <select className="h-10 rounded-md border border-input bg-card px-3 text-sm" value={sector} onChange={(event) => setSector(event.target.value)}>
+          <select className="h-10 rounded-md border border-input bg-card px-3 text-sm" value={sector} onChange={(event) => handleSectorChange(event.target.value)}>
             <option value="all">All Sectors</option>
             {sectors.map((item) => (
               <option key={item} value={item}>
@@ -105,7 +140,7 @@ const RankingTable = () => {
               </option>
             ))}
           </select>
-          <select className="h-10 rounded-md border border-input bg-card px-3 text-sm" value={country} onChange={(event) => setCountry(event.target.value)}>
+          <select className="h-10 rounded-md border border-input bg-card px-3 text-sm" value={country} onChange={(event) => handleCountryChange(event.target.value)}>
             <option value="all">All Countries</option>
             {countries.map((item) => (
               <option key={item} value={item}>
@@ -118,7 +153,7 @@ const RankingTable = () => {
         {view === "map" ? (
           <div className="card-gradient rounded-xl border border-border/50 p-8">
             <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
-              {sortedCompanies.slice(0, 12).map((company) => (
+              {pagedCompanies.map((company) => (
                 <Link key={company.ticker} to={`/company/${company.ticker.toLowerCase()}`} className="rounded-lg border border-border/50 bg-background/50 p-4 transition-colors hover:border-primary/50">
                   <div className="mb-3 flex items-center justify-between">
                     <span className={cn("rank-badge", getRankBadge(company.rank))}>#{company.rank}</span>
@@ -147,7 +182,7 @@ const RankingTable = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {sortedCompanies.map((company, index) => (
+                  {pagedCompanies.map((company, index) => (
                     <motion.tr key={company.ticker} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2, delay: index * 0.01 }} className="border-b border-border/30 transition-colors hover:bg-secondary/20">
                       <td className="px-4 py-4">
                         <span className={cn("rank-badge", getRankBadge(company.rank))}>#{company.rank}</span>
@@ -198,16 +233,30 @@ const RankingTable = () => {
           </div>
         )}
 
-        <div className="mt-6 flex items-center justify-center gap-2">
-          <Button variant="outline" size="sm">Previous</Button>
-          {[1, 2, 3].map((page) => (
-            <Button key={page} variant={page === 1 ? "default" : "outline"} size="sm">
-              {page}
+        <div className="mt-6 flex flex-col items-center justify-between gap-3 md:flex-row">
+          <p className="text-sm text-muted-foreground">
+            Showing {sortedCompanies.length === 0 ? 0 : pageStart + 1}-{Math.min(pageStart + pageSize, sortedCompanies.length)} of {sortedCompanies.length} companies
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <Button variant="outline" size="sm" disabled={boundedPage === 1} onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}>
+              Previous
             </Button>
-          ))}
-          <span className="px-2 text-muted-foreground">...</span>
-          <Button variant="outline" size="sm">100</Button>
-          <Button variant="outline" size="sm">Next</Button>
+            {visiblePages.map((page, index) => {
+              const previousPage = visiblePages[index - 1];
+              const showGap = previousPage && page - previousPage > 1;
+              return (
+                <span key={page} className="flex items-center gap-2">
+                  {showGap && <span className="px-1 text-muted-foreground">...</span>}
+                  <Button variant={page === boundedPage ? "default" : "outline"} size="sm" onClick={() => setCurrentPage(page)}>
+                    {page}
+                  </Button>
+                </span>
+              );
+            })}
+            <Button variant="outline" size="sm" disabled={boundedPage === totalPages} onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}>
+              Next
+            </Button>
+          </div>
         </div>
       </div>
     </section>
