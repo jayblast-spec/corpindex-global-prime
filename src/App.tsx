@@ -5,6 +5,9 @@ import Rankings from "@/pages/Rankings";
 import Apply from "@/pages/Apply";
 import Partner from "@/pages/Partner";
 import Company from "@/pages/Company";
+import About from "@/pages/About";
+import Methodology from "@/pages/Methodology";
+import News from "@/pages/News";
 import SimplePage from "@/pages/SimplePage";
 import NotFound from "@/pages/NotFound";
 
@@ -59,7 +62,31 @@ const App = () => {
           </Layout>
         }
       />
-      {["about", "methodology", "news", "careers", "api", "privacy", "terms", "cookies"].map((path) => (
+      <Route
+        path="/about"
+        element={
+          <Layout showTicker={false}>
+            <About />
+          </Layout>
+        }
+      />
+      <Route
+        path="/methodology"
+        element={
+          <Layout showTicker={false}>
+            <Methodology />
+          </Layout>
+        }
+      />
+      <Route
+        path="/news"
+        element={
+          <Layout showTicker={false}>
+            <News />
+          </Layout>
+        }
+      />
+      {["careers", "api", "privacy", "terms", "cookies"].map((path) => (
         <Route
           key={path}
           path={`/${path}`}
