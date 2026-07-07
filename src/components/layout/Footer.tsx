@@ -8,6 +8,12 @@ const footerGroups = [
   { title: "Legal", links: [["Privacy Policy", "/privacy"], ["Terms of Service", "/terms"], ["Cookie Policy", "/cookies"]] },
 ];
 
+const socialLinks = [
+  { label: "Twitter", icon: Twitter },
+  { label: "LinkedIn", icon: Linkedin },
+  { label: "GitHub", icon: Github },
+];
+
 const Footer = () => (
   <footer className="border-t border-border/50 bg-card/50">
     <div className="container mx-auto px-4 py-12">
@@ -25,8 +31,8 @@ const Footer = () => (
             The definitive global authority for corporate ranking and certification.
           </p>
           <div className="flex gap-3">
-            {[Twitter, Linkedin, Github].map((Icon) => (
-              <a key={Icon.displayName} href="#" className="text-muted-foreground transition-colors hover:text-primary">
+            {socialLinks.map(({ label, icon: Icon }) => (
+              <a key={label} href="#" aria-label={label} className="text-muted-foreground transition-colors hover:text-primary">
                 <Icon className="h-5 w-5" />
               </a>
             ))}
