@@ -72,16 +72,26 @@ const Methodology = () => (
     </div>
 
     <Card className="card-gradient border-border/50">
-      <CardContent className="grid gap-8 p-8 lg:grid-cols-[1fr_260px]">
+      <CardContent className="grid gap-8 p-8 lg:grid-cols-[1fr_280px]">
         <div>
-          <h2 className="mb-3 text-3xl font-bold">Verification Status</h2>
+          <p className="mb-2 text-sm font-semibold uppercase tracking-[0.2em] text-primary">Institutional Trust Layer</p>
+          <h2 className="mb-3 text-3xl font-bold">CorpIndex Verified Standard</h2>
           <p className="mb-5 text-muted-foreground">
-            Companies can achieve "Verified" status by completing our enhanced due diligence process, which includes document verification, management interviews, and on-site assessments.
+            Verification is not a promotional label. It is a structured corporate trust review that tests
+            ownership transparency, governance discipline, audit quality, regulatory exposure, digital
+            resilience, disclosure behavior, and executive risk before a company earns the CorpIndex mark.
           </p>
-          <ul className="grid gap-3 md:grid-cols-2">
-            {["Enhanced credibility with investors", "Official CorpIndex certification badge", "Priority listing in search results", "Access to premium analytics"].map((item) => (
+          <ul className="grid gap-3 text-sm md:grid-cols-2">
+            {[
+              "Beneficial ownership and control-chain review",
+              "Board, audit, and executive-governance assessment",
+              "Regulatory, litigation, sanctions, and adverse-media screening",
+              "Financial disclosure and capital-discipline validation",
+              "Cybersecurity, AI/data governance, and digital-resilience checks",
+              "Continuous signal monitoring after verification",
+            ].map((item) => (
               <li key={item} className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-success" />
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-success" />
                 {item}
               </li>
             ))}
@@ -91,9 +101,10 @@ const Methodology = () => (
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <Award className="h-7 w-7" />
           </div>
-          <p className="text-sm text-muted-foreground">CorpIndex Score</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">CI Verified</p>
+          <p className="mt-2 text-sm text-muted-foreground">Institutional Trust Rating</p>
           <p className="font-mono text-4xl font-bold text-primary">$94.2</p>
-          <p className="mt-2 text-sm font-semibold text-success">Verified Company</p>
+          <p className="mt-2 text-sm font-semibold text-success">Continuous monitoring active</p>
         </div>
       </CardContent>
     </Card>
