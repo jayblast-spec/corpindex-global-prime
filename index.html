@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="CorpIndex Global Prime ranks market readiness for companies expanding into high-growth global regions."
+    />
+    <title>CorpIndex Global Prime</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="#overview" aria-label="CorpIndex Global Prime home">
+          <span class="brand-mark">CI</span>
+          <span>
+            <strong>CorpIndex</strong>
+            <small>Global Prime</small>
+          </span>
+        </a>
+        <nav class="nav-list" aria-label="Sections">
+          <a href="#overview" class="active">Overview</a>
+          <a href="#rankings">Rankings</a>
+          <a href="#nigeria">Nigeria</a>
+          <a href="#methodology">Methodology</a>
+        </nav>
+        <div class="sidebar-note">
+          <span class="eyebrow">MVP signal</span>
+          <p>Built for founders, operators, and analysts comparing emerging market expansion opportunities.</p>
+        </div>
+      </aside>
+
+      <main>
+        <section id="overview" class="hero-section">
+          <div class="hero-copy">
+            <span class="eyebrow">Market intelligence dashboard</span>
+            <h1>Rank global expansion markets by corporate readiness.</h1>
+            <p>
+              CorpIndex combines demand, infrastructure, talent, regulatory clarity, and digital adoption into a single
+              practical index for teams deciding where to launch next.
+            </p>
+            <div class="hero-actions" aria-label="Primary actions">
+              <a class="button primary" href="#rankings">View rankings</a>
+              <a class="button secondary" href="#methodology">See methodology</a>
+            </div>
+          </div>
+          <div class="map-panel" aria-label="Global readiness overview">
+            <div class="map-header">
+              <span>Global Prime Map</span>
+              <strong id="average-score">--</strong>
+            </div>
+            <div class="map-grid" id="map-grid" aria-label="Country readiness tiles"></div>
+          </div>
+        </section>
+
+        <section class="metric-strip" aria-label="CorpIndex summary metrics">
+          <article>
+            <span>Total markets</span>
+            <strong id="total-markets">--</strong>
+          </article>
+          <article>
+            <span>Top region</span>
+            <strong id="top-region">--</strong>
+          </article>
+          <article>
+            <span>Highest score</span>
+            <strong id="highest-score">--</strong>
+          </article>
+          <article>
+            <span>Nigeria rank</span>
+            <strong id="nigeria-rank">--</strong>
+          </article>
+        </section>
+
+        <section id="rankings" class="content-section">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Prime index</span>
+              <h2>Market rankings</h2>
+            </div>
+            <div class="controls" aria-label="Ranking filters">
+              <label>
+                <span>Search</span>
+                <input id="search-input" type="search" placeholder="Country or region" />
+              </label>
+              <label>
+                <span>Region</span>
+                <select id="region-filter">
+                  <option value="all">All regions</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>Market</th>
+                  <th>Region</th>
+                  <th>Score</th>
+                  <th>Signal</th>
+                  <th>Expansion fit</th>
+                </tr>
+              </thead>
+              <tbody id="ranking-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section id="nigeria" class="content-section split-section">
+          <div>
+            <span class="eyebrow">Featured market</span>
+            <h2>Nigeria opportunity brief</h2>
+            <p>
+              Nigeria is modeled as a high-upside market with strong population scale, fintech momentum, and regional
+              influence. The MVP uses it as the first deep-dive template for future country intelligence pages.
+            </p>
+            <div class="brief-list" id="nigeria-brief"></div>
+          </div>
+          <form class="lead-form" id="lead-form">
+            <span class="eyebrow">Operator waitlist</span>
+            <h3>Get the next country brief</h3>
+            <p>Capture early demand from expansion teams before adding accounts, payments, or live datasets.</p>
+            <label>
+              <span>Email</span>
+              <input name="email" type="email" placeholder="you@company.com" required />
+            </label>
+            <label>
+              <span>Market interest</span>
+              <select name="market">
+                <option>Nigeria</option>
+                <option>Ghana</option>
+                <option>Kenya</option>
+                <option>United Arab Emirates</option>
+                <option>United States</option>
+              </select>
+            </label>
+            <button class="button primary" type="submit">Join waitlist</button>
+            <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+          </form>
+        </section>
+
+        <section id="methodology" class="content-section">
+          <div class="section-heading">
+            <div>
+              <span class="eyebrow">Scoring model</span>
+              <h2>How the MVP score works</h2>
+            </div>
+          </div>
+          <div class="method-grid">
+            <article>
+              <strong>Demand</strong>
+              <p>Consumer and business appetite for new products, weighted by population and purchasing signals.</p>
+            </article>
+            <article>
+              <strong>Infrastructure</strong>
+              <p>Payments, internet access, logistics, cloud readiness, and reliability of operating rails.</p>
+            </article>
+            <article>
+              <strong>Talent</strong>
+              <p>Availability of digital, operational, and commercial talent needed to launch locally.</p>
+            </article>
+            <article>
+              <strong>Regulation</strong>
+              <p>Clarity, setup friction, and policy risk for foreign and local corporate operators.</p>
+            </article>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>
