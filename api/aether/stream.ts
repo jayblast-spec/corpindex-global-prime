@@ -78,8 +78,8 @@ function buildPageAnswer(path: string) {
 }
 
 function buildRiskAnswer(prompt: string, path: string) {
-  const subject = prompt.replace(/\s+/g, " ").trim() || "this company";
   const page = getPageName(path);
+  const subject = /\b(risk scan|scan risk|risk)\b/i.test(prompt) ? `${page} context` : prompt.replace(/\s+/g, " ").trim() || "this company";
 
   return [
     `Risk brief for ${subject}\n\n`,
@@ -95,8 +95,8 @@ function buildRiskAnswer(prompt: string, path: string) {
 }
 
 function buildCompanyBrief(prompt: string, path: string) {
-  const subject = prompt.replace(/\s+/g, " ").trim() || "the requested company";
   const page = getPageName(path);
+  const subject = /\b(create brief|brief from this|this page)\b/i.test(prompt) ? `${page} page` : prompt.replace(/\s+/g, " ").trim() || "the requested company";
 
   return [
     `CorpIndex brief: ${subject}\n\n`,

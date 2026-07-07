@@ -1,4 +1,5 @@
 import { FormEvent, KeyboardEvent, lazy, Suspense, useCallback, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import type { AetherAiState } from "@/components/Aether3D";
 
 const Aether3D = lazy(() => import("@/components/Aether3D"));
@@ -9,6 +10,19 @@ interface ChatMessage {
   id: string;
   role: ChatRole;
   content: string;
+}
+
+interface LensAction {
+  label: string;
+  prompt?: string;
+  to?: string;
+}
+
+interface LensProfile {
+  eyebrow: string;
+  title: string;
+  signal: string;
+  actions: LensAction[];
 }
 
 interface StreamRequestBody {
@@ -85,15 +99,119 @@ function parseSseChunk(chunk: string) {
   return { done, text: tokens.join("") };
 }
 
+function getLensProfile(path: string): LensProfile {
+  if (path.startsWith("/rankings")) {
+    return {
+      eyebrow: "Ranking Lens",
+      title: "Compare trust, momentum, and verification.",
+      signal: "Aether is watching score movement, sector filters, country exposure, and verified status.",
+      actions: [
+        { label: "Explain table", prompt: "Explain this rankings page" },
+        { label: "Risk scan", prompt: "Risk scan this rankings view" },
+        { label: "Live signals", to: "/intelligence" },
+      ],
+    };
+  }
+
+  if (path.startsWith("/intelligence")) {
+    return {
+      eyebrow: "Live Signal Lens",
+      title: "Turn fresh signals into briefable insight.",
+      signal: "News, market movement, filings, and generated reports are active on this surface.",
+      actions: [
+        { label: "Create brief", prompt: "Create a brief from this intelligence page" },
+        { label: "Risk scan", prompt: "Risk scan the current live signals" },
+        { label: "Method", to: "/methodology" },
+      ],
+    };
+  }
+
+  if (path.startsWith("/methodology")) {
+    return {
+      eyebrow: "Trust Architecture",
+      title: "Inspect how credibility is scored.",
+      signal: "This page explains pillars, process, verification gates, and institutional trust criteria.",
+      actions: [
+        { label: "Explain method", prompt: "Explain this methodology page" },
+        { label: "Verify logic", prompt: "Summarize the CorpIndex Verified Standard" },
+        { label: "Apply", to: "/apply" },
+      ],
+    };
+  }
+
+  if (path.startsWith("/news")) {
+    return {
+      eyebrow: "Editorial Signal",
+      title: "Convert market movement into authority.",
+      signal: "News should connect rankings, methodology shifts, regions, sectors, and executive relevance.",
+      actions: [
+        { label: "Brief story", prompt: "Create a brief from this news page" },
+        { label: "Angle scan", prompt: "What investor angle matters on this page?" },
+        { label: "Intel", to: "/intelligence" },
+      ],
+    };
+  }
+
+  if (path.startsWith("/apply")) {
+    return {
+      eyebrow: "Verification Path",
+      title: "Move companies from claim to trust.",
+      signal: "Aether can explain indexing, due diligence, ownership review, and verification readiness.",
+      actions: [
+        { label: "Readiness", prompt: "What does a company need before applying?" },
+        { label: "Trust scan", prompt: "Risk scan the application process" },
+        { label: "Method", to: "/methodology" },
+      ],
+    };
+  }
+
+  if (path.startsWith("/partner")) {
+    return {
+      eyebrow: "Partner Lens",
+      title: "Find the institutional value path.",
+      signal: "This surface is for data partners, sponsors, advertisers, and enterprise relationships.",
+      actions: [
+        { label: "Partner fit", prompt: "Explain partner opportunities on this page" },
+        { label: "Audience", prompt: "Who is the buyer for CorpIndex partnerships?" },
+        { label: "Intel", to: "/intelligence" },
+      ],
+    };
+  }
+
+  if (path.startsWith("/company/")) {
+    return {
+      eyebrow: "Company Lens",
+      title: "Inspect trust posture before comparison.",
+      signal: "Aether can read score context, verification status, risk posture, and peer relevance.",
+      actions: [
+        { label: "Company brief", prompt: "Create a company brief from this profile" },
+        { label: "Risk scan", prompt: "Risk scan this company profile" },
+        { label: "Rankings", to: "/rankings" },
+      ],
+    };
+  }
+
+  return {
+    eyebrow: "Aether Lens",
+    title: "CorpIndex intelligence is active.",
+    signal: "I can guide rankings, verification, live signals, company briefs, and investor-ready risk scans.",
+    actions: [
+      { label: "Explain page", prompt: "Explain this page" },
+      { label: "Rankings", to: "/rankings" },
+      { label: "Live intel", to: "/intelligence" },
+    ],
+  };
+}
+
 const starterMessage: ChatMessage = {
   id: "assistant-starter",
   role: "assistant",
-  content: "I can explain this page, create a brief, or scan risk.",
+  content: "Aether Lens is active. Choose a signal or ask a focused question.",
 };
 
-const quickActions = ["Explain this page", "Create brief", "Risk scan"] as const;
-
 export default function AetherChatWidget() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [aiState, setAiState] = useState<AetherAiState>("idle");
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([starterMessage]);
@@ -102,14 +220,15 @@ export default function AetherChatWidget() {
   const abortRef = useRef<AbortController | null>(null);
   const successTimerRef = useRef<number | null>(null);
 
+  const lens = useMemo(() => getLensProfile(location.pathname), [location.pathname]);
   const isBusy = aiState === "processing" || aiState === "typing";
-  const visibleMessages = isExpanded ? messages.slice(-4) : messages.slice(-1);
+  const visibleMessages = messages.slice(-4);
   const statusLabel = useMemo(() => {
     if (aiState === "processing") return "Computing";
     if (aiState === "typing") return "Streaming";
     if (aiState === "success") return "Complete";
     if (aiState === "error") return "Needs attention";
-    return "Ready";
+    return "Live";
   }, [aiState]);
 
   const appendToAssistantMessage = useCallback((messageId: string, token: string) => {
@@ -193,11 +312,11 @@ export default function AetherChatWidget() {
   );
 
   const getPageContext = useCallback(() => {
-    const path = window.location.pathname;
-    const title = document.title || "CorpIndex";
-
-    return { path, title };
-  }, []);
+    return {
+      path: location.pathname,
+      title: document.title || "CorpIndex",
+    };
+  }, [location.pathname]);
 
   const submit = useCallback(
     async (event?: FormEvent<HTMLFormElement>, overridePrompt?: string) => {
@@ -240,6 +359,17 @@ export default function AetherChatWidget() {
     [getPageContext, input, isBusy, messages, streamAnswer],
   );
 
+  const runAction = (action: LensAction) => {
+    if (action.to) {
+      navigate(action.to);
+      return;
+    }
+
+    if (action.prompt) {
+      void submit(undefined, action.prompt);
+    }
+  };
+
   const handleInputKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
@@ -255,51 +385,60 @@ export default function AetherChatWidget() {
         </Suspense>
       </div>
 
-      <section className="pointer-events-auto absolute bottom-0 right-0 w-[min(90vw,19.5rem)] overflow-hidden rounded-[1.35rem] border border-white/20 bg-slate-100/65 text-slate-950 shadow-2xl shadow-slate-900/20 backdrop-blur-2xl">
-        <div className="flex items-center justify-between border-b border-white/40 px-3.5 py-2.5">
-          <div>
-            <p className="text-sm font-semibold tracking-tight">Aether</p>
-            <p className="text-xs text-slate-600">CorpIndex intelligence co-pilot</p>
-          </div>
-          <button
-            aria-label={isExpanded ? "Minimize Aether chat" : "Expand Aether chat"}
-            className="rounded-full border border-slate-900/10 bg-white/65 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-600 transition hover:bg-white"
-            onClick={() => setIsExpanded((value) => !value)}
-            type="button"
-          >
-            {isExpanded ? "Minimize" : statusLabel}
-          </button>
-        </div>
+      <div className="absolute right-4 top-7 hidden max-w-[12rem] rounded-2xl border border-white/30 bg-white/55 px-3 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-slate-600 shadow-xl shadow-slate-900/10 backdrop-blur-xl sm:block">
+        {lens.eyebrow}
+      </div>
 
-        <div className={`${isExpanded ? "max-h-48" : "max-h-20"} space-y-2 overflow-y-auto p-3`}>
-          {visibleMessages.map((message) => (
-            <article
-              key={message.id}
-              className={`rounded-2xl px-3 py-2 text-xs leading-5 ${
-                message.role === "user"
-                  ? "ml-8 bg-slate-950 text-white"
-                  : "mr-8 border border-slate-900/10 bg-white/70 text-slate-700 shadow-sm"
-              }`}
-            >
-              {message.content || <span className="animate-pulse text-slate-400">Composing...</span>}
-            </article>
-          ))}
-          {error && <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-700">{error}</p>}
-        </div>
-
-        <div className="flex gap-2 overflow-x-auto border-t border-white/40 bg-white/20 px-3 py-2.5">
-          {quickActions.map((action) => (
+      <section className="pointer-events-auto absolute bottom-0 right-0 w-[min(90vw,20rem)] overflow-hidden rounded-[1.35rem] border border-white/20 bg-slate-100/65 text-slate-950 shadow-2xl shadow-slate-900/20 backdrop-blur-2xl">
+        <div className="border-b border-white/40 px-3.5 py-2.5">
+          <div className="mb-2 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{lens.eyebrow}</p>
+              <p className="text-sm font-bold tracking-tight text-slate-950">{lens.title}</p>
+            </div>
             <button
-              className="shrink-0 rounded-full border border-slate-900/10 bg-white/65 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-white disabled:opacity-45"
-              disabled={isBusy}
-              key={action}
-              onClick={() => void submit(undefined, action)}
+              aria-label={isExpanded ? "Minimize Aether lens" : "Expand Aether lens"}
+              className="rounded-full border border-slate-900/10 bg-white/65 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-600 transition hover:bg-white"
+              onClick={() => setIsExpanded((value) => !value)}
               type="button"
             >
-              {action}
+              {isExpanded ? "Minimize" : statusLabel}
+            </button>
+          </div>
+          <p className="text-xs leading-5 text-slate-600">{lens.signal}</p>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 border-b border-white/40 bg-white/20 px-3 py-2.5">
+          {lens.actions.map((action) => (
+            <button
+              className="min-h-9 rounded-xl border border-slate-900/10 bg-white/70 px-2 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-white disabled:opacity-45"
+              disabled={isBusy}
+              key={action.label}
+              onClick={() => runAction(action)}
+              type="button"
+            >
+              {action.label}
             </button>
           ))}
         </div>
+
+        {isExpanded && (
+          <div className="max-h-48 space-y-2 overflow-y-auto p-3">
+            {visibleMessages.map((message) => (
+              <article
+                key={message.id}
+                className={`rounded-2xl px-3 py-2 text-xs leading-5 ${
+                  message.role === "user"
+                    ? "ml-8 bg-slate-950 text-white"
+                    : "mr-8 border border-slate-900/10 bg-white/70 text-slate-700 shadow-sm"
+                }`}
+              >
+                {message.content || <span className="animate-pulse text-slate-400">Composing...</span>}
+              </article>
+            ))}
+            {error && <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-700">{error}</p>}
+          </div>
+        )}
 
         <form className="border-t border-white/40 bg-white/35 p-3" onSubmit={submit}>
           <div className="flex items-end gap-2 rounded-2xl border border-slate-900/10 bg-white/70 p-2 shadow-inner">
@@ -309,7 +448,7 @@ export default function AetherChatWidget() {
               disabled={isBusy}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={handleInputKeyDown}
-              placeholder="Ask for a brief..."
+              placeholder="Ask Aether..."
               rows={1}
               value={input}
             />
