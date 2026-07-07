@@ -6,6 +6,7 @@ import Apply from "@/pages/Apply";
 import Partner from "@/pages/Partner";
 import Company from "@/pages/Company";
 import About from "@/pages/About";
+import Intelligence from "@/pages/Intelligence";
 import Methodology from "@/pages/Methodology";
 import News from "@/pages/News";
 import SimplePage from "@/pages/SimplePage";
@@ -59,6 +60,14 @@ const App = () => {
         element={
           <Layout>
             <Company />
+          </Layout>
+        }
+      />
+      <Route
+        path="/intelligence"
+        element={
+          <Layout>
+            <Intelligence />
           </Layout>
         }
       />

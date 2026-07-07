@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { label: "Rankings", href: "/rankings", hasDropdown: true },
+  { label: "Intelligence", href: "/intelligence" },
   { label: "Methodology", href: "/methodology" },
   { label: "News", href: "/news" },
   { label: "About", href: "/about" },

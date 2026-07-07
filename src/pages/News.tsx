@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { formatRefresh, useIntelligence } from "@/lib/intelligence";
 
 const articles = [
   ["Rankings Update", "Q4 2024 Global Rankings: Tech Giants Maintain Dominance Amid Market Shifts", "Apple retains the top spot for the eighth consecutive quarter, while NVIDIA sees the largest score increase driven by AI infrastructure demand.", "December 15, 2024", "8 min read"],
@@ -11,13 +12,40 @@ const articles = [
   ["Education", "Understanding the $CI$ Score: A Deep Dive", "A comprehensive guide to interpreting CorpIndex scores and what they mean for investors.", "December 1, 2024", "10 min read"],
 ];
 
-const News = () => (
-  <section className="container mx-auto px-4 py-16">
-    <div className="mx-auto mb-12 max-w-3xl text-center">
-      <h1 className="mb-4 text-4xl font-bold md:text-5xl">News & Insights</h1>
-      <p className="text-lg text-muted-foreground">The latest updates on global rankings, methodology changes, and market analysis</p>
-    </div>
-    <div className="grid gap-5">
+const News = () => {
+  const { data, loading } = useIntelligence();
+
+  return (
+    <section className="container mx-auto px-4 py-16">
+      <div className="mx-auto mb-12 max-w-3xl text-center">
+        <h1 className="mb-4 text-4xl font-bold md:text-5xl">News & Insights</h1>
+        <p className="text-lg text-muted-foreground">The latest updates on global rankings, methodology changes, and market analysis</p>
+      </div>
+
+      <Card className="card-gradient mb-8 border-primary/30">
+        <CardContent className="p-6">
+          <div className="mb-4 flex flex-col justify-between gap-3 md:flex-row md:items-center">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Live Source Layer</p>
+              <h2 className="mt-1 text-2xl font-bold">Current Corporate Signals</h2>
+            </div>
+            <p className="font-mono text-sm text-muted-foreground">
+              {loading ? "Refreshing..." : `Updated ${formatRefresh(data?.refreshedAt)}`}
+            </p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            {(data?.news || []).slice(0, 3).map((item) => (
+              <a key={item.url} href={item.url} target="_blank" rel="noreferrer" className="rounded-lg border border-border/50 bg-background/50 p-4 transition-colors hover:border-primary/50">
+                <p className="mb-2 text-xs font-semibold text-primary">{item.domain || item.source}</p>
+                <h3 className="line-clamp-3 font-semibold">{item.title}</h3>
+              </a>
+            ))}
+            {!loading && !data?.news.length && <p className="text-muted-foreground">Live news is temporarily unavailable.</p>}
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-5">
       {articles.map(([category, title, body, date, read], index) => (
         <Card key={title} className={index === 0 ? "card-gradient border-primary/30" : "border-border/50"}>
           <CardContent className="p-6">
@@ -35,6 +63,7 @@ const News = () => (
       <Button variant="outline" size="lg">Load More Articles</Button>
     </div>
   </section>
-);
+  );
+};
 
 export default News;
