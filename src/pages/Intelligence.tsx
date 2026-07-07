@@ -139,11 +139,11 @@ const Intelligence = () => {
       </div>
 
       <div className="mt-10 rounded-xl border border-primary/30 bg-primary/10 p-6">
-        <h2 className="mb-2 text-2xl font-bold">YC sellability signal</h2>
+        <h2 className="mb-2 text-2xl font-bold">Build an elite corporate watchlist</h2>
         <p className="text-muted-foreground">
-          This is the foundation for a paid product: source-backed corporate briefs, freshness guarantees, sector/country watchlists, verified-company upsells, and API access for investors.
+          Track verified companies, sector shifts, regulatory filings, market movement, and regional signals in one continuously refreshed intelligence layer.
         </p>
-        <Button className="mt-5">Investor-grade reports are now the product wedge</Button>
+        <Button className="mt-5">Create Intelligence Brief</Button>
       </div>
     </section>
   );
