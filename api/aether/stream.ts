@@ -6,19 +6,74 @@ function asText(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function isCapabilityQuestion(prompt: string) {
+  return /\b(what can you do|what do you do|help|capabilities|how can you help|who are you)\b/i.test(prompt);
+}
+
+function isRiskQuestion(prompt: string) {
+  return /\b(risk|risks|red flag|red flags|governance|compliance|sanction|litigation|audit|ownership)\b/i.test(prompt);
+}
+
+function isBriefQuestion(prompt: string) {
+  return /\b(brief|summary|report|analyze|analyse|company|investor|rating|score|watchlist)\b/i.test(prompt);
+}
+
+function buildCapabilityAnswer() {
+  return [
+    "I can help you turn CorpIndex signals into decision-ready corporate intelligence.\n\n",
+    "Here is what I can do:\n",
+    "- Create company briefs for investors, partners, and analysts.\n",
+    "- Summarize governance, ownership, audit, disclosure, and regulatory risk.\n",
+    "- Explain why a company score or ranking may matter.\n",
+    "- Turn market movement, filings, and news into a plain-English signal.\n",
+    "- Draft watchlist notes for sectors, countries, or verified companies.\n",
+    "- Help compare companies by credibility, momentum, and institutional trust.\n\n",
+    "Try asking: \"Give me a risk brief on Apple\", \"Compare NVIDIA and Microsoft\", or \"Create a Nigeria banking watchlist note.\"",
+  ].join("");
+}
+
+function buildRiskAnswer(prompt: string) {
+  const subject = prompt.replace(/\s+/g, " ").trim() || "this company";
+
+  return [
+    `Risk brief for ${subject}\n\n`,
+    "Primary risk lenses:\n",
+    "- Governance: board independence, audit quality, executive concentration, and disclosure discipline.\n",
+    "- Ownership: beneficial ownership clarity, control-chain complexity, related-party exposure, and insider influence.\n",
+    "- Regulatory: litigation, sanctions exposure, sector supervision, filing behavior, and adverse-media signals.\n",
+    "- Market: sharp price movement, valuation pressure, earnings surprises, and sentiment shifts.\n",
+    "- Digital resilience: cybersecurity posture, data governance, AI use, and operational continuity.\n\n",
+    "CorpIndex interpretation: the strongest companies are not just high-growth; they are transparent, resilient, well-governed, and continuously monitorable.",
+  ].join("");
+}
+
+function buildCompanyBrief(prompt: string) {
+  const subject = prompt.replace(/\s+/g, " ").trim() || "the requested company";
+
+  return [
+    `CorpIndex brief: ${subject}\n\n`,
+    "Executive read:\n",
+    "Aether would evaluate this company through corporate quality, governance reliability, market momentum, and public-source signal freshness.\n\n",
+    "What to inspect:\n",
+    "- Score context: ranking position, sector peers, country exposure, and score movement.\n",
+    "- Trust layer: verification status, disclosure quality, ownership transparency, and audit confidence.\n",
+    "- Signal movement: news intensity, market changes, filing activity, and regulatory alerts.\n",
+    "- Investor angle: whether the company is becoming more credible, more risky, or more strategically important.\n\n",
+    "Best next question: ask me for a risk scan, peer comparison, or investor-ready one-page note on a specific company.",
+  ].join("");
+}
+
 function buildBrief(prompt: string) {
   const normalizedPrompt = prompt || "Create an investor-ready CorpIndex intelligence brief.";
 
+  if (isCapabilityQuestion(normalizedPrompt)) return buildCapabilityAnswer();
+  if (isRiskQuestion(normalizedPrompt)) return buildRiskAnswer(normalizedPrompt);
+  if (isBriefQuestion(normalizedPrompt)) return buildCompanyBrief(normalizedPrompt);
+
   return [
-    `Aether brief: ${normalizedPrompt}\n\n`,
-    "CorpIndex reads this as an intelligence workflow, not a static website action. ",
-    "For an MVP-grade response, the product should synthesize live market movement, regulatory filings, company ranking context, and source-backed news into one concise analyst note.\n\n",
-    "Signal frame:\n",
-    "- Governance: flag board, audit, ownership, sanctions, litigation, and disclosure risk.\n",
-    "- Market: connect price movement to corporate events instead of showing raw numbers alone.\n",
-    "- Verification: separate verified trust status from promotional claims.\n",
-    "- Investor angle: explain why the signal matters now, who should care, and what changed.\n\n",
-    "Recommended next action: open the Intelligence page, generate a company-specific brief, then convert the strongest signal into a saved watchlist item or verification upsell.",
+    "I can help with CorpIndex intelligence work.\n\n",
+    "Ask me for a company brief, risk scan, peer comparison, governance review, market signal explanation, or investor-ready note. ",
+    "For best results, include a company, sector, country, or specific question.",
   ].join("");
 }
 
