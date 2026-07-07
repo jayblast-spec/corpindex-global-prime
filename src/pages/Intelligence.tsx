@@ -1,4 +1,5 @@
-import { Activity, ArrowUpRight, DatabaseZap, FileText, Globe2, Newspaper, Radar, Sparkles, type LucideIcon } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Activity, ArrowUpRight, DatabaseZap, FileText, Globe2, Newspaper, Radar, Sparkles, X, type LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -7,6 +8,37 @@ import { cn } from "@/lib/utils";
 
 const Intelligence = () => {
   const { data, error, loading } = useIntelligence();
+  const [briefOpen, setBriefOpen] = useState(false);
+  const brief = useMemo(() => {
+    if (!data) return null;
+
+    const topReport = data.reports[0];
+    const topMarket = data.markets.find((signal) => signal.changePercent !== null) || data.markets[0];
+
+    return {
+      title: topReport?.title || "Global corporate signal brief",
+      summary:
+        topReport?.summary ||
+        "CorpIndex synthesized the latest public news, market, and filing activity into a decision-ready corporate intelligence brief.",
+      bullets: [
+        ...(topReport?.bullets || []),
+        topMarket
+          ? `${topMarket.ticker} is showing ${topMarket.changePercent !== null ? `${topMarket.changePercent}%` : "fresh"} market movement in the current signal window.`
+          : "Market movement is being monitored across the tracked company universe.",
+        data.filings[0]
+          ? `${data.filings[0].company} filed ${data.filings[0].form}, adding a regulatory signal for analyst review.`
+          : "Regulatory filing streams are active for monitored issuers.",
+      ].slice(0, 5),
+      news: data.news.slice(0, 3),
+      filings: data.filings.slice(0, 2),
+      refreshedAt: formatRefresh(data.refreshedAt),
+    };
+  }, [data]);
+
+  const createBrief = () => {
+    setBriefOpen(true);
+    window.setTimeout(() => document.getElementById("generated-brief")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  };
 
   return (
     <section className="container mx-auto px-4 py-12">
@@ -143,8 +175,61 @@ const Intelligence = () => {
         <p className="text-muted-foreground">
           Track verified companies, sector shifts, regulatory filings, market movement, and regional signals in one continuously refreshed intelligence layer.
         </p>
-        <Button className="mt-5">Create Intelligence Brief</Button>
+        <Button className="mt-5" type="button" disabled={loading || !data} onClick={createBrief}>
+          {loading ? "Preparing live signals" : "Create Intelligence Brief"}
+        </Button>
       </div>
+
+      {briefOpen && brief && (
+        <Card id="generated-brief" className="mt-6 border-primary/40" aria-live="polite">
+          <CardContent className="p-6">
+            <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+              <div>
+                <Badge variant="outline" className="mb-3 border-primary/40 text-primary">Generated Brief</Badge>
+                <h2 className="text-3xl font-bold">{brief.title}</h2>
+                <p className="mt-2 text-sm text-muted-foreground">Created from live CorpIndex signals refreshed {brief.refreshedAt}</p>
+              </div>
+              <Button variant="ghost" size="icon" type="button" aria-label="Close intelligence brief" onClick={() => setBriefOpen(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <p className="mb-5 text-muted-foreground">{brief.summary}</p>
+
+            <div className="grid gap-5 lg:grid-cols-[1fr_0.85fr]">
+              <div>
+                <h3 className="mb-3 font-semibold">Analyst Notes</h3>
+                <ul className="space-y-3 text-sm text-muted-foreground">
+                  {brief.bullets.map((bullet) => (
+                    <li key={bullet} className="flex gap-2">
+                      <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                      {bullet}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="rounded-lg border border-border/50 bg-card/60 p-4">
+                <h3 className="mb-3 font-semibold">Source Trail</h3>
+                <div className="space-y-3 text-sm">
+                  {brief.news.map((item) => (
+                    <a key={item.url} href={item.url} target="_blank" rel="noreferrer" className="flex items-start justify-between gap-3 rounded-md border border-border/40 p-3 transition-colors hover:border-primary/50">
+                      <span>{item.title}</span>
+                      <ArrowUpRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                    </a>
+                  ))}
+                  {brief.filings.map((filing) => (
+                    <a key={filing.accession} href={filing.url} target="_blank" rel="noreferrer" className="flex items-start justify-between gap-3 rounded-md border border-border/40 p-3 transition-colors hover:border-primary/50">
+                      <span>{filing.company} {filing.form}</span>
+                      <ArrowUpRight className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </section>
   );
 };
