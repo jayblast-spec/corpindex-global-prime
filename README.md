@@ -1,50 +1,43 @@
 # CorpIndex Global Prime
 
-CorpIndex Global Prime is an MVP dashboard for ranking corporate expansion readiness across global markets.
+CorpIndex Global Prime is a Vite + React + TypeScript MVP rebuilt from the Lovable project fragments.
 
-The first version is a static, deployable product surface that validates whether founders, operators, and analysts care about a practical market-readiness index before adding accounts, paid data feeds, or complex backend workflows.
+It recreates the visible CorpIndex product direction: a premium corporate intelligence platform with live-style rankings, a moving market ticker, company certification CTAs, partner monetization, and route coverage for the first MVP.
+
+## Stack
+
+- Vite
+- TypeScript
+- React
+- React Router
+- Tailwind CSS
+- shadcn/ui-style local components
+- Framer Motion
+- Lucide React
 
 ## MVP Scope
 
-- Responsive dashboard with global market rankings
-- Interactive search and region filtering
-- Prime score summary metrics
-- Nigeria country brief as the first deep-dive template
-- Operator waitlist capture stored in browser local storage
-- Vercel-ready static deployment config
+- Home page with hero, stats, ticker, rankings preview, features, and CTAs
+- `/rankings` with searchable/sortable Global Top 100 table
+- `/company/:ticker` detail pages
+- `/apply` company certification intent form
+- `/partner` partner/advertiser intent form
+- Placeholder content pages for methodology, news, about, API, legal
+- `robots.txt`, social metadata, and Vercel SPA rewrites
 
-## Product Pipeline Notes
-
-- CEO / Founder: Proves demand for a ranked market intelligence product.
-- CTO: Static-first architecture keeps deployment fast and low-risk.
-- Database/Auth: Deferred; no sensitive user data or authenticated workflows in MVP.
-- Backend Logic: Deferred; score model is currently static and transparent.
-- Frontend: Mobile-first single-page dashboard.
-- Integration/API: Deferred until a data-source partner or internal research workflow exists.
-- Security: No server-side secrets; static headers configured in `vercel.json`.
-- Testing: `node --check app.js` plus local HTTP smoke test.
-- Deployment: Ready for Vercel static hosting.
-- Documentation/Growth: README and waitlist CTA included.
-
-## Local Run
+## Local Development
 
 ```bash
-node server.mjs
+npm install
+npm run dev
 ```
 
-Open `http://localhost:4173`.
+## Verification
 
-## Files
+```bash
+npm run build
+```
 
-- `index.html` - App shell and semantic content
-- `styles.css` - Responsive product UI
-- `app.js` - Market data, rankings, filters, metrics, and waitlist behavior
-- `vercel.json` - Static hosting headers
-- `server.mjs` - Local static server for smoke testing
+## Notes
 
-## Next MVP Decisions
-
-1. Replace static scores with a repeatable research rubric and source citations.
-2. Add Supabase only when saved leads, admin editing, or user accounts are required.
-3. Turn Nigeria into the first full market page with pricing, risk, and launch playbooks.
-4. Add analytics to measure ranking views, searches, market interest, and waitlist conversion.
+This is now much closer to the pasted Lovable source than the earlier static MVP. It is still not guaranteed pixel-perfect until the live Lovable preview can be visually compared or the full source export is available.
