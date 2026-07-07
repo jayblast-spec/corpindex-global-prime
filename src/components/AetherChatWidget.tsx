@@ -14,6 +14,10 @@ interface ChatMessage {
 interface StreamRequestBody {
   message: string;
   history: Array<Pick<ChatMessage, "role" | "content">>;
+  context: {
+    path: string;
+    title: string;
+  };
 }
 
 const decoder = new TextDecoder();
@@ -84,8 +88,10 @@ function parseSseChunk(chunk: string) {
 const starterMessage: ChatMessage = {
   id: "assistant-starter",
   role: "assistant",
-  content: "I am Aether, CorpIndex's live intelligence co-pilot. Ask for a company brief, risk scan, or investor-ready angle.",
+  content: "I am Aether, CorpIndex's live intelligence co-pilot. I can explain this page, create a brief, scan risk, or help you decide what to inspect next.",
 };
+
+const quickActions = ["Explain this page", "Create brief", "Risk scan"] as const;
 
 export default function AetherChatWidget() {
   const [aiState, setAiState] = useState<AetherAiState>("idle");
@@ -184,11 +190,18 @@ export default function AetherChatWidget() {
     [appendToAssistantMessage, finishSuccessfully],
   );
 
+  const getPageContext = useCallback(() => {
+    const path = window.location.pathname;
+    const title = document.title || "CorpIndex";
+
+    return { path, title };
+  }, []);
+
   const submit = useCallback(
-    async (event?: FormEvent<HTMLFormElement>) => {
+    async (event?: FormEvent<HTMLFormElement>, overridePrompt?: string) => {
       event?.preventDefault();
 
-      const prompt = input.trim();
+      const prompt = (overridePrompt || input).trim();
       if (!prompt || isBusy) return;
 
       if (successTimerRef.current) {
@@ -207,7 +220,7 @@ export default function AetherChatWidget() {
       setMessages((current) => [...current, userMessage, assistantMessage]);
 
       try {
-        await streamAnswer({ message: prompt, history }, assistantMessage.id);
+        await streamAnswer({ message: prompt, history, context: getPageContext() }, assistantMessage.id);
       } catch (streamError) {
         if ((streamError as Error).name === "AbortError") return;
         setAiState("error");
@@ -221,7 +234,7 @@ export default function AetherChatWidget() {
         );
       }
     },
-    [input, isBusy, messages, streamAnswer],
+    [getPageContext, input, isBusy, messages, streamAnswer],
   );
 
   const handleInputKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
@@ -232,42 +245,59 @@ export default function AetherChatWidget() {
   };
 
   return (
-    <div className="pointer-events-none fixed bottom-6 right-6 z-50 w-[min(92vw,24rem)]">
-      <section className="pointer-events-auto overflow-hidden rounded-3xl border border-white/10 bg-slate-950/40 text-white shadow-2xl shadow-cyan-950/30 backdrop-blur-xl">
-        <div className="relative h-56 border-b border-white/10 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.22),transparent_55%),linear-gradient(135deg,rgba(15,23,42,0.88),rgba(2,6,23,0.72))]">
-          <Suspense fallback={<div className="absolute inset-0 animate-pulse bg-white/5" />}>
-            <Aether3D aiState={aiState} className="absolute inset-0" />
-          </Suspense>
-          <div className="absolute left-4 top-4 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur-md">
-            {statusLabel}
+    <div className="pointer-events-none fixed bottom-3 right-3 z-50 h-[min(86vh,46rem)] w-[min(96vw,38rem)] sm:bottom-5 sm:right-5">
+      <div className="absolute bottom-24 right-0 h-[min(64vh,34rem)] w-[min(88vw,30rem)] drop-shadow-[0_32px_70px_rgba(15,23,42,0.42)] sm:bottom-28 sm:right-1">
+        <Suspense fallback={<div className="h-full w-full animate-pulse rounded-[2rem] bg-white/10 backdrop-blur-sm" />}>
+          <Aether3D aiState={aiState} className="h-full w-full" />
+        </Suspense>
+      </div>
+
+      <section className="pointer-events-auto absolute bottom-0 right-0 w-[min(92vw,22rem)] overflow-hidden rounded-[1.35rem] border border-white/20 bg-slate-100/70 text-slate-950 shadow-2xl shadow-slate-900/25 backdrop-blur-2xl">
+        <div className="flex items-center justify-between border-b border-white/40 px-4 py-3">
+          <div>
+            <p className="text-sm font-semibold tracking-tight">Aether</p>
+            <p className="text-xs text-slate-600">CorpIndex intelligence co-pilot</p>
           </div>
-          <div className="absolute bottom-4 left-4 right-4">
-            <p className="text-lg font-semibold tracking-tight">Aether</p>
-            <p className="text-sm text-slate-300">CorpIndex intelligence co-pilot</p>
+          <div className="rounded-full border border-slate-900/10 bg-white/60 px-2.5 py-1 text-[0.68rem] font-semibold uppercase tracking-[0.14em] text-slate-600">
+            {statusLabel}
           </div>
         </div>
 
-        <div className="max-h-72 space-y-3 overflow-y-auto p-4">
+        <div className="max-h-56 space-y-3 overflow-y-auto p-4">
           {messages.map((message) => (
             <article
               key={message.id}
               className={`rounded-2xl px-4 py-3 text-sm leading-6 ${
                 message.role === "user"
-                  ? "ml-8 bg-cyan-400/15 text-cyan-50"
-                  : "mr-8 border border-white/10 bg-white/[0.06] text-slate-100"
+                  ? "ml-8 bg-slate-950 text-white"
+                  : "mr-8 border border-slate-900/10 bg-white/70 text-slate-700 shadow-sm"
               }`}
             >
               {message.content || <span className="animate-pulse text-slate-400">Composing...</span>}
             </article>
           ))}
-          {error && <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">{error}</p>}
+          {error && <p className="rounded-xl border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-xs text-rose-700">{error}</p>}
         </div>
 
-        <form className="border-t border-white/10 p-3" onSubmit={submit}>
-          <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-white/[0.06] p-2">
+        <div className="flex flex-wrap gap-2 border-t border-white/40 bg-white/20 px-4 py-3">
+          {quickActions.map((action) => (
+            <button
+              className="rounded-full border border-slate-900/10 bg-white/65 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-white disabled:opacity-45"
+              disabled={isBusy}
+              key={action}
+              onClick={() => void submit(undefined, action)}
+              type="button"
+            >
+              {action}
+            </button>
+          ))}
+        </div>
+
+        <form className="border-t border-white/40 bg-white/35 p-3" onSubmit={submit}>
+          <div className="flex items-end gap-2 rounded-2xl border border-slate-900/10 bg-white/70 p-2 shadow-inner">
             <textarea
               aria-label="Message Aether"
-              className="max-h-28 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm text-white outline-none placeholder:text-slate-500"
+              className="max-h-28 min-h-10 flex-1 resize-none bg-transparent px-2 py-2 text-sm text-slate-950 outline-none placeholder:text-slate-500"
               disabled={isBusy}
               onChange={(event) => setInput(event.target.value)}
               onKeyDown={handleInputKeyDown}
@@ -276,7 +306,7 @@ export default function AetherChatWidget() {
               value={input}
             />
             <button
-              className="rounded-xl bg-cyan-300 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-45"
+              className="rounded-xl bg-slate-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-45"
               disabled={!input.trim() || isBusy}
               type="submit"
             >
